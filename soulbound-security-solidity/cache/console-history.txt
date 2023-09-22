@@ -1,0 +1,14 @@
+await sbs.burn(1);
+sbs.mint("0x7B52f833c225133A6C849584325A554588A6B597","testProject");
+;
+sbs.createProject("testProject","0x8BaCbFa19c18457591138944fFdF445E7278D179")
+;
+const sbs = await SoulBoundSecurity.attach("0x27f1359a1dad11e7a00f296d159dd9b4d7d91ff3")
+const SoulBoundSecurity = await ethers.getContractFactory("SoulBoundSecurity");
+exit
+quit
+quit()
+await sb.owner()
+await sb.safeMint('0x7B52f833c225133A6C849584325A554588A6B597')
+const sb = await Soulbound.attach('0x1A58ea72Ec8d9543D827a927eEA9F6b18C50c423')
+const Soulbound = await ethers.getContractFactory('Soulbound');
