@@ -1,0 +1,109 @@
+<html>
+   <head>
+      <title>Connect to crypto wallet</title>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4-rc.1/web3.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/gh/chrisdickinson/bops@master/dist/bops.js" type="module"></script>
+ </head>
+<body>
+<script>
+/* To connect using MetaMask */
+
+var globalAccount = null;
+var globalSignature = null;
+
+async function connect() {
+  if (window.ethereum) {
+     await window.ethereum.request({ method: "eth_requestAccounts" });
+     window.web3 = new Web3(window.ethereum);
+     const account = web3.eth.accounts;
+     //Get the current MetaMask selected/active wallet
+     const walletAddress = account.givenProvider.selectedAddress;
+     console.log(`Wallet: ${walletAddress}`);
+     globalAccount = walletAddress;
+      signMessage();
+  } else {
+   console.log("No wallet");
+  }
+}
+
+async function signMessage(){
+   const message = document.getElementById("message").value;
+   const userID = document.getElementById("userID").value;
+   const signatureCopy = document.getElementById("signature");
+   console.log("Message: " + message);
+   try {
+      const from = globalAccount;
+      console.log("from: " + from);
+      const msg = `0x${bops.from(message, 'utf8').toString('hex')}`;
+      console.log("msg: " + msg);
+      const sign = await ethereum.request({
+         method: 'personal_sign',
+         params: [message, from, 'dlkafjeue'],
+      });
+      console.log("sign: " + sign);
+      globalSignature = sign;
+      signatureCopy.value = sign;
+      
+      fetch("https://maniacalengineer.com/soulboundsecurity/verify/",{
+         method: "POST",
+         body: JSON.stringify({
+            signature: sign,
+            user: userID,
+         }),
+         headers: {
+            "Content-type": "application/json; charset=UTF-8"
+        }
+      });
+      
+   }catch (err) {
+      console.log(err);
+      signatureCopy.value = "Error: Check Console";
+   }
+
+}
+
+async function copyContent() {
+  try {
+   let text = document.getElementById("signature").value;
+    await navigator.clipboard.writeText(text);
+    console.log('Content copied to clipboard');
+    /* Resolved - text copied to clipboard successfully */
+  } catch (err) {
+    console.error('Failed to copy: ', err);
+    /* Rejected - text failed to copy to the clipboard */
+  }
+}
+
+async function verifyMessage() {
+    const message = document.getElementById("message").value;
+    try {
+        const from = globalAccount;
+        const msg = `0x${bops.from(message, 'utf8').toString('hex')}`;
+        const recoveredAddr = web3.eth.accounts.recover(msg, globalSignature);
+        console.log('recoveredAddr : ' + recoveredAddr);
+            recoveredAddr
+        if (recoveredAddr.toLowerCase() === from.toLowerCase()) {
+            console.log(`Successfully ecRecovered signer as ${recoveredAddr}`);
+        } else {
+            console.log(
+                `Failed to verify signer when comparing ${recoveredAddr} to ${from}`,
+            );
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+</script>
+<h1>Step 1: Enter message provided by discord bot</h1><br>
+<input id="message" type="text" value={{ message }}><br>
+<input id="user-id" type="hidden" value={{ userID }}>
+<h1>Step 2: Connect Wallet & Sign Transaction</h1><br>
+<input type="button" value="Connect Wallet" onclick="connect();"><br>
+<h1>Step 3: Copy signature and enter in to discord bot</h1><br>
+<input id="signature" type="text"><input type="button" value="Copy Signature" onclick="copyContent()">
+
+
+<span></span>
+</body>
+</html>
